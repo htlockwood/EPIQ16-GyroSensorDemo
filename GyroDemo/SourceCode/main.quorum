@@ -1,0 +1,59 @@
+use Libraries.Robots.Lego.Motor
+use Libraries.Robots.Lego.GyroSensor
+use Libraries.Robots.Lego.Utility
+use Libraries.Robots.Lego.Sound
+use Libraries.Robots.Lego.Screen
+
+class Main
+    action Main
+        Motor motor
+        GyroSensor gyro
+        Utility utility
+        Sound sound
+        Screen screen
+
+        gyro:SetPort(3)
+        integer vol=10
+        integer basespeed=25
+        sound:SetVolume(vol)
+        motor:SetSpeed("B",basespeed)
+        motor:SetSpeed("C",basespeed)
+        motor:RotateForward("B")
+        motor:RotateForward("C")
+
+        repeat 200 times
+            text message = "DEG: " + gyro:GetRotation()
+            screen:OutputCenter(message,2)
+            motor:SetSpeed("B",basespeed)
+            motor:SetSpeed("C",basespeed)
+            motor:RotateForward("B")
+            motor:RotateForward("C")
+            // if robot is moving too far to the right, adjust speed of motor
+            // C (the left motor) to keep the robot moving in a straight line
+            if gyro:GetRotation() < -1.0
+                //motor:Stop("C")
+                motor:SetSpeed("C", motor:GetSpeed("C") + 5)
+                motor:SetSpeed("B",basespeed)
+                motor:RotateForward("C")
+                motor:RotateForward("B")
+            // if robot is moving too far to the left, adjust speed of motor
+            // B (the right motor) to keep the robot moving in a straight line
+            elseif gyro:GetRotation() > 1.0
+                //motor:Stop("B")
+                motor:SetSpeed("B", motor:GetSpeed("B") + 5)
+                motor:SetSpeed("C",basespeed)
+                motor:RotateForward("B")
+                motor:RotateForward("C")
+            else
+                motor:SetSpeed("B", basespeed)
+                motor:SetSpeed("C",basespeed)
+                motor:RotateForward("B")
+                motor:RotateForward("C")
+            end
+            // wait a second before sampling the angle again
+            utility:DelayMilliseconds(100)
+            sound:Beep()
+
+        end
+    end
+end
